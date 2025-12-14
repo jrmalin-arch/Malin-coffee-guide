@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Guest Brew Guide</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style.css"> 
+</head>
+<body>
+
+    <div class="container">
+        <h1>Welcome! Let's Brew Coffee.</h1>
+        <div id="step-1" class="step">
+            <h2>1. How many cups?</h2>
+            <p class="hint">Moccamaster "cups" are 125g. Large mugs are ~300g.</p>
+            <div id="cup-options" class="button-group">
+                </div>
+        </div>
+
+        <div id="step-2" class="step hidden">
+            <h2>2. Choose Your Coffee Maker</h2>
+            <div id="maker-options" class="button-group">
+                </div>
+            <p class="hint" id="maker-hint"></p>
+        </div>
+
+        <div id="step-3" class="step hidden">
+            <h2>3. Choose Brew Strength (Ratio)</h2>
+            <div id="ratio-options" class="button-group">
+                <button data-ratio="14">Strong (1:14)</button>
+                <button data-ratio="16">Medium (1:16)</button>
+                <button data-ratio="18">Mild (1:18)</button>
+            </div>
+        </div>
+        
+        <div id="step-4" class="step hidden">
+            <h2>4. Which Grinder will you use?</h2>
+            <div id="grinder-options" class="button-group">
+                <button data-grinder="1zpresso">1Zpresso Q2 (Manual)</button>
+                <button data-grinder="baratza">Baratza (Electric)</button>
+            </div>
+        </div>
+
+        <div id="result-area" class="step hidden final-result">
+            <h2>🎉 Your Brewing Recipe!</h2>
+            <p>You have chosen to make <strong id="result-cups"></strong> cups using the <strong id="result-maker"></strong> at a <strong id="result-ratio-text"></strong> strength.</p>
+            <div class="card">
+                <p>☕️ **Total Water Needed:** <strong id="result-water"></strong> g</p>
+                <p>⚖️ **Beans to Grind:** <strong id="result-coffee"></strong> g</p>
+                <p>⚙️ **Grind Setting:** <strong id="result-grind-setting"></strong></p>
+            </div>
+            <button onclick="resetApp()">Start Over</button>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
