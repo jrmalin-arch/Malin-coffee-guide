@@ -1,5 +1,4 @@
 // --- Configuration & Data ---
-// Water Volumes are now specific to the number of cups/brewer capacity.
 const CUP_VOLUME_G = 125; // Moccamaster's definition of a "cup" in grams/ml
 const GRINDER_SETTINGS = {
     "1zpresso": {
@@ -23,12 +22,15 @@ let selectedGrinder = '';
 
 // --- Step 1: Cup Selection ---
 function initCupOptions() {
-    const cups = [1, 2, 4, 6, 8, 10]; // Added 10 cups
+    // Added 3, 5, 7, 9 cups
+    const cups = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; 
     const cupOptions = document.getElementById('cup-options');
-    // Updated button text to reflect the smaller KGBV cup size for clarity
+    
     cupOptions.innerHTML = cups.map(c => {
         let text = `${c} Cups`;
-        if (c > 2) {
+        if (c === 1) {
+            text += ` (300g mug)`;
+        } else if (c > 2) {
             text += ` (${c * CUP_VOLUME_G}g total)`;
         }
         return `<button onclick="selectCups(${c})">${text}</button>`
@@ -46,7 +48,7 @@ function selectCups(cups) {
         selectedWater = 300; // Single large mug volume
         document.getElementById('maker-hint').textContent = 'For a single large mug, choose the best device.';
         makerOptionsContainer.innerHTML = `
-            <button onclick="selectMaker('AeroPress')">AeroPress</button>
+            <button onclick="selectMaker('AeroPress')">AeroPress (Regular)</button>
             <button onclick="selectMaker('Cup One')">Moccamaster Cup One</button>
         `;
         showStep(2);
@@ -55,16 +57,14 @@ function selectCups(cups) {
         document.getElementById('maker-hint').textContent = 'The AeroPress XL is best for two servings (max capacity is 600ml).';
         makerOptionsContainer.innerHTML = `<button onclick="selectMaker('AeroPress')">AeroPress XL</button>`;
         showStep(2);
-    } else if (cups >= 4 && cups <= 10) {
+    } else if (cups >= 3 && cups <= 10) {
         // Moccamaster KGBV Logic (using 125g per cup)
         selectedWater = cups * CUP_VOLUME_G; 
         selectedMaker = 'Moccamaster KGBV';
-        document.getElementById('maker-hint').textContent = `The Moccamaster KGBV is the best choice for ${cups} cups.`;
+        document.getElementById('maker-hint').textContent = `The Moccamaster KGBV is the best choice for ${cups} cups (${selectedWater}g total).`;
         makerOptionsContainer.innerHTML = `<button onclick="selectMaker('Moccamaster KGBV')">Moccamaster KGBV</button>`;
-        // Since maker is effectively auto-selected, move straight to the next step
-        showStep(3); 
+        showStep(3); // Auto-selects maker, moves to next step
     } else {
-        // Should not happen with current button options
         alert('Invalid cup selection.');
         resetApp();
     }
@@ -73,17 +73,16 @@ function selectCups(cups) {
 // --- Step 2: Maker Selection (For 1-2 Cups) ---
 function selectMaker(maker) {
     selectedMaker = maker;
-    // Special handling for the 2-cup case, which must be AeroPress XL (which uses the 'AeroPress' setting for grind)
-    if (selectedCups === 2 && selectedMaker === 'AeroPress') {
-        selectedMaker = 'AeroPress XL'; // Update display name
-    } else if (selectedCups === 1 && selectedMaker === 'AeroPress') {
-         selectedMaker = 'AeroPress (Regular)';
+    // Special handling for AeroPress to set the correct display name
+    if (selectedCups === 1 && selectedMaker === 'AeroPress') {
+        selectedMaker = 'AeroPress (Regular)';
+    } else if (selectedCups === 2 && selectedMaker === 'AeroPress') {
+        selectedMaker = 'AeroPress XL'; 
     }
-
     showStep(3);
 }
 
-// --- Step 3 & 4: Ratio and Grinder Selection (No changes, reused from previous code) ---
+// --- Step 3 & 4: Ratio and Grinder Selection (No changes) ---
 function initRatioOptions() {
     const ratioButtons = document.getElementById('ratio-options').querySelectorAll('button');
     ratioButtons.forEach(button => {
@@ -115,9 +114,19 @@ function calculateAndDisplayResult() {
     if (selectedRatio === 14) ratioText = 'Strong (1:14)';
     else if (selectedRatio === 16) ratioText = 'Medium (1:16)';
     else ratioText = 'Mild (1:18)';
-
-    // Adjust maker name for grind lookup (AeroPress XL/Regular are both just 'AeroPress' for grind settings)
-    const lookupMaker = selectedMaker.includes('AeroPress') ? 'AeroPress' : selectedMaker.split(' ')[0]; 
+    
+    // FIX: Robust logic to get the correct lookup key for GRINDER_SETTINGS
+    let lookupMaker;
+    if (selectedMaker.includes('AeroPress')) {
+        lookupMaker = 'AeroPress';
+    } else if (selectedMaker.includes('Cup One')) {
+        lookupMaker = 'Cup One';
+    } else {
+        // Must be Moccamaster KGBV
+        lookupMaker = 'Moccamaster KGBV';
+    }
+    
+    // This will now always correctly pull a setting unless Grinder or Maker wasn't selected
     const grindSetting = GRINDER_SETTINGS[selectedGrinder][lookupMaker];
 
     // Update the result display
